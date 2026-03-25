@@ -9,10 +9,10 @@ public interface IProductService {
     Product addProduct(Product product);
     Product getProductById(Long id);
     void updateProduct(Product product);
-    void deleteProduct(Long id);
+    void deleteProductById(Long id);
     List<Product> getAllProducts();
     List<Product> getProductsByName(String name);
-    List<Product> getProductsByBrand(Long id);
+    List<Product> getProductsByBrand(String brand);
     List<Product> getProductsByCategory(String category);
     List<Product> getProductByBrandAndName(String brand, String name);
     List<Product> getProductByCategoryAndBrand(String category, String brand);
