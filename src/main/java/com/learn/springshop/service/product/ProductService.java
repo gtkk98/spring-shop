@@ -1,28 +1,52 @@
 package com.learn.springshop.service.product;
 
 import com.learn.springshop.exceptions.ProductNotFoundException;
+import com.learn.springshop.model.Category;
 import com.learn.springshop.model.Product;
+import com.learn.springshop.repository.CategoryRepository;
 import com.learn.springshop.repository.ProductRepository;
+import com.learn.springshop.request.AddProductRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
-    public Product addProduct(Product product) {
-        return null;
+    public Product addProduct(AddProductRequest request) {
+
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
+                .orElseGet(() -> {
+                    Category newCategory = new Category(request.getCategory().getName());
+                    return categoryRepository.save(newCategory);
+                });
+        request.setCategory(category);
+        return productRepository.save(createProduct(request, category));
+    }
+
+    private Product createProduct(AddProductRequest request, Category category) {
+        return new Product(
+                request.getName(),
+                request.getBrand(),
+                request.getPrice(),
+                request.getInventory(),
+                request.getDescription(),
+                category
+        );
     }
 
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found by id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found by id: " + id)
+                );
     }
 
     @Override
@@ -33,8 +57,9 @@ public class ProductService implements IProductService {
     @Override
     public void deleteProductById(Long id) {
         productRepository.findById(id)
-                .ifPresentOrElse(productRepository::delete, ()
-                        -> {throw new ProductNotFoundException("Product not found by id: " + id);});
+                .ifPresentOrElse(productRepository::delete,
+                        () -> {throw new ProductNotFoundException("Product not found by id: " + id);
+                });
     }
 
     @Override
